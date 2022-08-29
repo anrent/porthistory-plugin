@@ -1,6 +1,6 @@
 """Navigation Items to add to Nautobot for nautobot_porthistory_plugin."""
 
-from nautobot.extras.plugins import PluginMenuItem
+from extras.plugins import PluginMenuItem
 
 menu_items = (
     PluginMenuItem(

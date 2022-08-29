@@ -1,7 +1,7 @@
 """Views for nautobot_porthistory_plugin."""
 
 from django.shortcuts import render
-from nautobot.core.views import generic
+from netbox.views import generic
 
 from nautobot_porthistory_plugin import models, tables, filters, forms
 

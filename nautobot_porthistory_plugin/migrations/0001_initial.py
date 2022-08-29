@@ -9,14 +9,15 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ('dcim', '0007_device_secrets_group'),
-    ]
+#    dependencies = [
+#        (),
+#    ]
 
     operations = [
         migrations.CreateModel(
             name='UnusedPorts',
             fields=[
+                ('created', models.DateTimeField(auto_now=True)),
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('last_output', models.DateTimeField()),

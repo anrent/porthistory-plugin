@@ -2,10 +2,10 @@
 
 from django.db import models
 
-from nautobot.core.models import BaseModel
-from nautobot.dcim.fields import MACAddressCharField
+from netbox.models import NetBoxModel
+from dcim.fields import MACAddressField
 
-class UnusedPorts(BaseModel):
+class UnusedPorts(NetBoxModel):
     # Дата/время последнего output на порту коммутатора 
 
     updated = models.DateTimeField(auto_now=True)
@@ -19,11 +19,11 @@ class UnusedPorts(BaseModel):
     def __str__(self):
         return f'{self.interface.name} - {self.last_output}'
 
-class MAConPorts(BaseModel):
+class MAConPorts(NetBoxModel):
     # MAC и IP на порту коммутатора 
 
     updated = models.DateTimeField(auto_now=True)
-    mac = MACAddressCharField(blank=False, verbose_name="MAC Address")
+    mac = MACAddressField(blank=False, verbose_name="MAC Address")
     vlan = models.ForeignKey(
         to="ipam.VLAN",
         on_delete=models.CASCADE,

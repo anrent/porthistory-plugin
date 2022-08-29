@@ -1,7 +1,7 @@
 """nautobot_porthistory_plugin Plugin Initilization."""
 
-from nautobot.extras.plugins import PluginConfig
-from nautobot.core.signals import nautobot_database_ready
+from extras.plugins import PluginConfig
+from netbox.signals import post_clean
 from .signals import create_custom_fields_for_porthistory
 
 class NautobotPorthistoryPluginConfig(PluginConfig):
@@ -15,7 +15,7 @@ class NautobotPorthistoryPluginConfig(PluginConfig):
     author = 'Max Iontzev'
     author_email = 'iontzev@gmail.com'
     min_version = "1.0.0"  # Minimum version of Nautobot with which the plugin is compatible.
-    max_version = "1.999"  # Maximum version of Nautobot with which the plugin is compatible.
+    max_version = "3.2.8"  # Maximum version of Nautobot with which the plugin is compatible.
     default_settings = {
         'min_idle_days': 14,
         'snmp_community': 'public',
@@ -26,7 +26,7 @@ class NautobotPorthistoryPluginConfig(PluginConfig):
 
     def ready(self):
         super().ready()
-        nautobot_database_ready.connect(create_custom_fields_for_porthistory, sender=self)
+        post_clean.connect(create_custom_fields_for_porthistory, sender=self)
 
 
 config = NautobotPorthistoryPluginConfig

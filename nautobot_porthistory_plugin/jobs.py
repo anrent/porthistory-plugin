@@ -1,9 +1,9 @@
 from django.contrib.contenttypes.models import ContentType
 
-from nautobot.dcim.models import Device, DeviceRole, Site, Interface, Cable
-from nautobot.ipam.models import VLAN, IPAddress, Prefix
-from nautobot.extras.jobs import Job, ObjectVar
-from nautobot.extras.models import Status
+from dcim.models import Device, DeviceRole, Site, Interface, Cable
+from ipam.models import VLAN, IPAddress, Prefix
+from extras.scripts import Script, ObjectVar
+#from extras.models import Status
 from django.conf import settings
 
 from nautobot_porthistory_plugin.models import UnusedPorts, MAConPorts
@@ -17,7 +17,7 @@ from collections import defaultdict
 from netutils.interface import canonical_interface_name
 from datetime import datetime, timedelta
 
-class UnusedPortsUpdate(Job):
+class UnusedPortsUpdate(Script):
 
     class Meta:
         name = "Обновление информации о неподключенных интерфейсах"
@@ -86,32 +86,41 @@ class UnusedPortsUpdate(Job):
         MIN_IDLE_DAYS = PLUGIN_CFG.get('min_idle_days', 14)
         SWITCHES_ROLE_SLUG = PLUGIN_CFG['switches_role_slug']
         WORKERS = PLUGIN_CFG['workers']
-        STATUS_ACTIVE = Status.objects.get(slug='active')
+        STATUS_ACTIVE = 'active'
 
         # сгенерируем справочник устройств
         devices = [] #этот список передадим в модуль snmp
         device_dict = defaultdict(dict)
-        device_role = DeviceRole.objects.filter(slug__in=SWITCHES_ROLE_SLUG)
+        device_role = SWITCHES_ROLE_SLUG
+        print(data['site'])
+        print(device_role)
+        print(STATUS_ACTIVE)
         if data['site']:
-            nb_devices = Device.objects.filter(site=data['site'], device_role__in=device_role, status=STATUS_ACTIVE)
+            nb_devices = Device.objects.filter(site=data['site'], device_role__name__in=device_role, status=STATUS_ACTIVE)
         else:
-            nb_devices = Device.objects.filter(device_role__in=device_role, status=STATUS_ACTIVE)
-            
+            nb_devices = Device.objects.filter(device_role__name__in=device_role, status=STATUS_ACTIVE)
+
+        print(nb_devices)
+
         for nb_device in nb_devices:
-            if nb_device.platform and nb_device.platform.napalm_driver and nb_device.platform.napalm_driver == 'cisco_iosxe' and nb_device.primary_ip4:
+            print(nb_device)
+            if nb_device.primary_ip4:
                 primary_ip = str(nb_device.primary_ip4).split('/')[0]
+                print(primary_ip)
                 devices.append(primary_ip)
                 device_dict[primary_ip]['device'] = nb_device
                 device_dict[primary_ip]['interfaces'] = {}
                 device_dict[primary_ip]['ifindexes'] = {}
-                device_interfaces = Interface.objects.filter(device_id=nb_device)
+                device_interfaces = Interface.objects.filter(device__name=nb_device)
                 for intf in device_interfaces:
                     device_dict[primary_ip]['interfaces'][intf.name] = [intf]
+#                    print(device_dict)
 
         # получим uptime оборудования по SNMP (в секундах)
         # и занесем эту информацию в справочник
         oid_list = ['.1.3.6.1.6.3.10.2.1.3']
         results = asyncio.run(self.async_bulk_snmp(devices, oid_list, COMMUNITY, WORKERS))
+        print(results)
         for device_ip, device_result in results:
             if type(device_result) != dict:
                 self.log_warning(obj=device_dict[device_ip]['device'],message=f'не удалось получить информацию по SNMP - {device_result}')
@@ -121,7 +130,7 @@ class UnusedPortsUpdate(Job):
                     device_dict[device_ip]['uptime'] = uptime
                     boottime = datetime.now() - timedelta(seconds=uptime)
                     device_dict[device_ip]['boottime'] = boottime
-    
+#                    print(device_dict) 
         # получим названия интерфейсов и их индексы с оборудования по SNMP
         # и занесем эту информацию в справочник
         oid_list = ['.1.3.6.1.2.1.31.1.1.1.1']
@@ -135,7 +144,7 @@ class UnusedPortsUpdate(Job):
                     canonical_intf_name = canonical_interface_name(index_result.decode("utf-8"))
                     if canonical_intf_name in device_dict[device_ip]['interfaces']:
                         device_dict[device_ip]['ifindexes'][ifindex] = canonical_intf_name
-
+#                        print(device_dict)
         # получим время последнего output по SNMP
         oid_list = ['.1.3.6.1.4.1.9.2.2.1.1.4']
         results = asyncio.run(self.async_bulk_snmp(devices, oid_list, COMMUNITY, WORKERS))
@@ -154,6 +163,7 @@ class UnusedPortsUpdate(Job):
                     if ifindex in device_dict[device_ip]['ifindexes']:
                         intf_name = device_dict[device_ip]['ifindexes'][ifindex]
                         nb_interface = device_dict[device_ip]['interfaces'][intf_name][0]
+                        print(nb_interface)
                         if time_from_last_output < 0 or time_from_last_output / 1000 > uptime - 300:
                             unused_port_count += 1
                             unused_port, created = UnusedPorts.objects.get_or_create(
@@ -180,10 +190,10 @@ class UnusedPortsUpdate(Job):
                                     unused_port.last_output = last_output
                                     unused_port.save()
             output += f'неиспользуемых в течении {MIN_IDLE_DAYS} дн. портов - {unused_port_count}\n'
-
+            print(output)
         return output
 
-class MAConPortsUpdate(Job):
+class MAConPortsUpdate(Script):
 
     class Meta:
         name = "Обновление информации о подключенных устройствах"

@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import nautobot.dcim.fields
+import dcim.fields
 import uuid
 
 
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('mac', nautobot.dcim.fields.MACAddressCharField()),
+                ('mac', dcim.fields.MACAddressField()),
                 ('device', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dcim.device')),
                 ('interface', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dcim.interface')),
                 ('ipaddress', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='ipam.ipaddress')),

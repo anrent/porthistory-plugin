@@ -1,6 +1,7 @@
 import django_filters
-from nautobot.dcim.models import Device
-from nautobot.utilities.filters import BaseFilterSet, MultiValueCharFilter
+from dcim.models import Device
+from utilities.filters import MultiValueCharFilter
+from netbox.filtersets import BaseFilterSet
 from django.db.models import Q
 
 from nautobot_porthistory_plugin.models import MAConPorts

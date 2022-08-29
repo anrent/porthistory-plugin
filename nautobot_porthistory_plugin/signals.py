@@ -1,4 +1,4 @@
-from nautobot.extras.choices import CustomFieldTypeChoices
+from extras.choices import CustomFieldTypeChoices
 
 def create_custom_fields_for_porthistory(sender, apps, **kwargs):
     """Create a custom field flag_porthistory for VLAN if it doesn't already exist."""

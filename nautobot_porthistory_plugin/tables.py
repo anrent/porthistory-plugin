@@ -1,6 +1,6 @@
 import django_tables2 as tables
 from django_tables2.utils import A
-from nautobot.utilities.tables import BaseTable, ToggleColumn
+from netbox.tables import BaseTable, ToggleColumn
 
 from nautobot_porthistory_plugin import models
 

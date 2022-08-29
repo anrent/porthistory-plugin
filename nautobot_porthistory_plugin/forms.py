@@ -1,9 +1,9 @@
 from django import forms
 
-from nautobot.dcim.models import Region, Site, Device
-from nautobot.ipam.models import VLAN
-from nautobot.utilities.forms import BootstrapMixin, DynamicModelMultipleChoiceField
-from nautobot.extras.forms import CustomFieldFilterForm
+from dcim.models import Region, Site, Device
+from ipam.models import VLAN
+from utilities.forms import BootstrapMixin, DynamicModelMultipleChoiceField
+from extras.forms import CustomFieldFilterForm
 
 from nautobot_porthistory_plugin.models import MAConPorts
 

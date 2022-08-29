@@ -1,4 +1,4 @@
-from nautobot.extras.plugins import PluginTemplateExtension
+from extras.plugins import PluginTemplateExtension
 from django.conf import settings
 
 from .models import UnusedPorts, MAConPorts
