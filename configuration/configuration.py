@@ -201,6 +201,16 @@ PAGINATE_COUNT = int(environ.get('PAGINATE_COUNT', 50))
 
 PLUGINS = ["nautobot_porthistory_plugin"]
 
+PLUGINS_CONFIG = {
+    'nautobot_porthistory_plugin': {
+        'switches_role_slug': ['Access-switch'],
+        'routers_role_slug': ['Router'],
+        'min_idle_days': 14,
+        'snmp_community': 'public',
+        'workers': 50,
+     }
+}
+
 # When determining the primary IP address for a device, IPv6 is preferred over IPv4 by default. Set this to True to
 # prefer IPv4 instead.
 PREFER_IPV4 = environ.get('PREFER_IPV4', 'False').lower() == 'true'
